@@ -71,6 +71,11 @@ public class TerminalBuffer {
         cursor.setY(0);
     }
 
+    public void clearScreenAndScrollback() {
+        clearScreen();
+        scrollback.clear();
+    }
+
     public void fillLineWith(Character character) {
         Line line = screen.get(cursor.getY());
         for (int i = 0; i < line.getWidth(); i++) {
@@ -120,6 +125,21 @@ public class TerminalBuffer {
         return builder.toString();
     }
 
+    public String getScreenAndScrollbackContent() {
+        String screenContent = getScreenContent();
+
+        Line[] lines = scrollback.toArray(new Line[0]);
+        StringBuilder builder = new StringBuilder();
+
+        for (Line line: lines) {
+            builder.append(line.toString());
+        }
+
+        return builder + screenContent;
+    }
+
+
+
     public int getScreenSize() {
         return screen.size();
     }
@@ -132,16 +152,31 @@ public class TerminalBuffer {
         return scrollback.size();
     }
 
-    public String getLine(int y) {
-        return screen.get(y).toString();
+    public Line getLineAtScreen(int y) {
+        return screen.get(y);
     }
 
-    public Character getCharacter(int x, int y) {
+    public Line getLineAtScrollback(int y) {
+        Line[] lines = scrollback.toArray(new Line[0]);
+        return lines[y];
+    }
+
+    public Character getCharacterAtScreen(int x, int y) {
         return screen.get(y).getCell(x).getCharacter();
     }
 
-    public Attributes getAttributes(int x, int y) {
+    public Character getCharacterAtScrollback(int x, int y) {
+        Line[] lines = scrollback.toArray(new Line[0]);
+        return lines[y].getCell(x).getCharacter();
+    }
+
+    public Attributes getAttributesAtScreen(int x, int y) {
         return screen.get(y).getCell(x).getAttributes();
+    }
+
+    public Attributes getAttributesAtScrollback(int x, int y) {
+        Line[] lines = scrollback.toArray(new Line[0]);
+        return lines[y].getCell(x).getAttributes();
     }
 
     public void setAttributes(Attributes attributes) {

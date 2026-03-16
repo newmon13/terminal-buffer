@@ -65,7 +65,9 @@ public class Cursor {
     }
 
     public void setX(int x) {
-        this.x = x;
+        if (x >= 0 && x < xBoundary) {
+            this.x = x;
+        }
     }
 
     public int getY() {
@@ -73,6 +75,8 @@ public class Cursor {
     }
 
     public void setY(int y) {
-        this.y = y;
+        if (y >= 0 && y < yBoundary) {
+            this.y = y;
+        }
     }
 }
