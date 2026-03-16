@@ -191,6 +191,48 @@ public class TerminalBufferTest{
     }
 
     @Test
+    void shouldFillLineWithEmptyCharacter() {
+        terminalBuffer.write("HelloWorld");
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.fillLineWith(null);
+
+        assertEquals("", terminalBuffer.getLineAtScreen(0).toString());
+    }
+
+    @Test
+    void shouldRemoveOldestLineFromScrollbackWhenFull() {
+        terminalBuffer = new TerminalBuffer();
+        terminalBuffer.setup(10, 1, 2);
+
+        terminalBuffer.write("Line1");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.write("Line2");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.write("Line3");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        assertEquals(2, terminalBuffer.getScrollbackSize());
+        assertEquals("Line2", terminalBuffer.getLineAtScrollback(0).toString());
+        assertEquals("Line3", terminalBuffer.getLineAtScrollback(1).toString());
+    }
+
+    @Test
+    void shouldNotSetCursorXBeyondScreenWidth() {
+        terminalBuffer.getCursor().setX(100);
+
+        assertEquals(0, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
+    void shouldNotSetCursorYBeyondScreenHeight() {
+        terminalBuffer.getCursor().setY(100);
+
+        assertEquals(0, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
     public void shouldStampCurrentAttributesOnWrittenCells() {
         Attributes attrs = new Attributes();
         attrs.setForeground(Color.RED);
