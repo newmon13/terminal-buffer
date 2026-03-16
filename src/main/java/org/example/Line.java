@@ -9,18 +9,37 @@ public class Line {
 
     public Line(int width) {
         this.line = new Cell[width];
-        Arrays.fill(this.line, new Cell(' '));
+        for (int i = 0; i < width; i++) {
+            this.line[i] = new Cell();
+        }
     }
+
+    public Cell getCell(int position) {
+        return line[position];
+    }
+
+//    @Override
+//    public String toString() {
+//        StringBuilder builder = new StringBuilder();
+//
+//        for (Cell cell : line) {
+//            builder.append(cell.toString()).append(",");
+//        }
+//
+//        builder.deleteCharAt(builder.length() - 1);
+//
+//        return builder.toString();
+//    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
         for (Cell cell : line) {
-            builder.append(cell.toString()).append(",");
+            if (cell.getCharacter() != null) {
+                builder.append(cell.getCharacter());
+            }
         }
-
-        builder.deleteCharAt(builder.length() - 1);
 
         return builder.toString();
     }

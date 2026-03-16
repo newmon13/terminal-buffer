@@ -16,19 +16,19 @@ public class Cursor {
     }
 
     public void moveUp(int n) {
-        if (this.y + n <= yBoundary) {
-            this.y = this.y + n;
-        }
-    }
-
-    public void moveDown(int n) {
         if (this.y - n >= 0) {
             this.y = this.y - n;
         }
     }
 
+    public void moveDown(int n) {
+        if (this.y + n < yBoundary) {
+            this.y = this.y + n;
+        }
+    }
+
     public void moveRight(int n) {
-        if (this.x + n <= xBoundary) {
+        if (this.x + n < xBoundary) {
             this.x = this.x + n;
         }
     }

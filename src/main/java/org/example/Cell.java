@@ -6,6 +6,10 @@ public class Cell {
     private Attributes attributes;
 
 
+    public Cell() {
+
+    }
+
     public Cell(Character character) {
         this.character = character;
     }
