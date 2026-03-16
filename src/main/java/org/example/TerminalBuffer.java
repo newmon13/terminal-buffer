@@ -50,7 +50,7 @@ public class TerminalBuffer {
             cursor.moveRightWithWrap(1);
 
             row++;
-            while (overflow != null) {
+            while (overflow != null && row < screen.size()) {
                 Cell oldOverflow = overflow;
                 overflow = shiftLineRight(screen.get(row), 0);
                 screen.get(row).getCell(0).setCharacter(oldOverflow.getCharacter());
@@ -161,12 +161,5 @@ public class TerminalBuffer {
         }
 
         return builder.toString();
-    }
-
-    public static void main(String[] args) {
-        TerminalBuffer terminalBuffer = new TerminalBuffer();
-        terminalBuffer.setup(10, 4, 10);
-
-        System.out.println(terminalBuffer);
     }
 }

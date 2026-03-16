@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayDeque;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TerminalBufferTest{
 
@@ -119,6 +118,23 @@ public class TerminalBufferTest{
         ArrayDeque<Line> scrollback = terminalBuffer.getScrollback();
 
         assertEquals(text, scrollback.peek().toString());
+    }
+
+    @Test
+    void shouldLoseContentThatExceedsScreenSizeWhenInserting() {
+        terminalBuffer = new TerminalBuffer();
+        terminalBuffer.setup(5,2, 0);
+
+        String text = "Hello World";
+        String expectedText = "Hello Word";
+
+        terminalBuffer.insert(text);
+
+        String screenContent = terminalBuffer.getScreenContent();
+
+        System.out.println(screenContent);
+
+        assertEquals(expectedText, screenContent);
     }
 
 

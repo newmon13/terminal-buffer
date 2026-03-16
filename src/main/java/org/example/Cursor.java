@@ -21,10 +21,12 @@ public class Cursor {
         }
     }
 
-    public void moveDown(int n) {
+    public boolean moveDown(int n) {
         if (this.y + n < yBoundary) {
             this.y = this.y + n;
+            return true;
         }
+        return false;
     }
 
     public void moveRight(int n) {
@@ -37,8 +39,9 @@ public class Cursor {
         if (this.x + n < xBoundary) {
             this.x = this.x + n;
         } else {
-            this.y = this.y + 1;
-            this.x = 0;
+            if (moveDown(1)) {
+                this.x = 0;
+            }
         }
     }
 
@@ -52,7 +55,7 @@ public class Cursor {
         if (this.x - n >= 0) {
             this.x = this.x - n;
         } else {
-            this.y = this.y - 1;
+            moveUp(1);
             this.x = this.xBoundary - 1;
         }
     }
