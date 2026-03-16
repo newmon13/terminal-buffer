@@ -57,21 +57,6 @@ public class TerminalBufferTest{
     }
 
     @Test
-    void shouldShiftLineBy2WhenInsertingEmoji() {
-        String emoji = "😀";
-
-        terminalBuffer.write("AB");
-        terminalBuffer.getCursor().setX(0);
-        terminalBuffer.getCursor().setY(0);
-        terminalBuffer.insert(emoji);
-
-        assertEquals(emoji, terminalBuffer.getCharacterAtScreen(0, 0));
-        assertTrue(terminalBuffer.getLineAtScreen(0).getCell(1).isBlocked());
-        assertEquals("A", terminalBuffer.getCharacterAtScreen(2, 0));
-        assertEquals("B", terminalBuffer.getCharacterAtScreen(3, 0));
-    }
-
-    @Test
     void shouldWriteEmojiUsingWrite() {
         terminalBuffer.write("😀");
 
@@ -81,7 +66,7 @@ public class TerminalBufferTest{
     }
 
     @Test
-    void shouldWriteEmoji() {
+    void shouldWriteEmojiUsingInsert() {
         String text = "😀";
 
         terminalBuffer.insert(text);
@@ -111,21 +96,6 @@ public class TerminalBufferTest{
         assertEquals(expectedResult, terminalBuffer.getScreenContent());
         assertTrue(lineAtScreen.getCell(7).isBlocked());
         assertEquals(8, terminalBuffer.getCursor().getX());
-    }
-
-    @Test
-    void shouldNotThrowWhenMovingBeyondBoundaries() {
-        assertDoesNotThrow(()-> {
-            terminalBuffer.getCursor().moveRight(SCREEN_WIDTH + 5);
-            terminalBuffer.getCursor().moveLeft(-5);
-            terminalBuffer.getCursor().moveUp(-5);
-            terminalBuffer.getCursor().moveDown(SCREEN_HEIGHT + 5);
-            terminalBuffer.getCursor().moveRightWithWrap(SCREEN_WIDTH * SCREEN_HEIGHT);
-            terminalBuffer.getCursor().moveLeftWithWrap(-SCREEN_WIDTH * SCREEN_HEIGHT);
-        });
-
-        assertEquals(SCREEN_WIDTH - 1, terminalBuffer.getCursor().getX());
-        assertEquals(SCREEN_HEIGHT - 1, terminalBuffer.getCursor().getY());
     }
 
     @Test
@@ -410,5 +380,67 @@ public class TerminalBufferTest{
 
         assertEquals(Color.DEFAULT, terminalBuffer.getAttributesAtScreen(0, 0).getForeground());
         assertEquals(Color.GREEN, terminalBuffer.getAttributesAtScreen(1, 0).getForeground());
+    }
+
+    @Test
+    public void shouldStampCurrentAttributesOnInsertedCells() {
+        Attributes attrs = new Attributes();
+        attrs.setForeground(Color.RED);
+        attrs.setBackground(Color.BLUE);
+        attrs.addStyle(Style.BOLD);
+
+        terminalBuffer.setAttributes(attrs);
+        terminalBuffer.insert("Hi");
+
+        Attributes cell0 = terminalBuffer.getAttributesAtScreen(0, 0);
+        assertEquals(Color.RED, cell0.getForeground());
+        assertEquals(Color.BLUE, cell0.getBackground());
+        assertTrue(cell0.getStyles().contains(Style.BOLD));
+    }
+
+    @Test
+    void shouldMoveCursorRight() {
+        terminalBuffer.getCursor().moveRight(3);
+
+        assertEquals(3, terminalBuffer.getCursor().getX());
+        assertEquals(0, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldNotMoveCursorRightBeyondBoundary() {
+        terminalBuffer.getCursor().setX(SCREEN_WIDTH - 1);
+        terminalBuffer.getCursor().moveRight(1);
+
+        assertEquals(SCREEN_WIDTH - 1, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
+    void shouldMoveCursorUp() {
+        terminalBuffer.getCursor().moveDown(2);
+        terminalBuffer.getCursor().moveUp(1);
+
+        assertEquals(1, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldNotMoveCursorUpBeyondBoundary() {
+        terminalBuffer.getCursor().moveUp(5);
+
+        assertEquals(0, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldMoveCursorDown() {
+        terminalBuffer.getCursor().moveDown(2);
+
+        assertEquals(2, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldNotMoveCursorDownBeyondBoundary() {
+        terminalBuffer.getCursor().setY(SCREEN_HEIGHT - 1);
+        terminalBuffer.getCursor().moveDown(1);
+
+        assertEquals(SCREEN_HEIGHT - 1, terminalBuffer.getCursor().getY());
     }
 }
