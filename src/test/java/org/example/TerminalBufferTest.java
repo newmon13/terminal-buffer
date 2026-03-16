@@ -24,6 +24,26 @@ public class TerminalBufferTest{
     }
 
     @Test
+    void shouldMoveCursorLeftWithWrap() {
+        Cursor cursor = terminalBuffer.getCursor();
+        cursor.setX(1);
+
+        cursor.moveLeftWithWrap(1);
+
+        assertEquals(0, cursor.getX());
+    }
+
+    @Test
+    void shouldMoveCursorLeft() {
+        Cursor cursor = terminalBuffer.getCursor();
+        cursor.setX(1);
+
+        cursor.moveLeft(1);
+
+        assertEquals(0, cursor.getX());
+    }
+
+    @Test
     void shouldShiftEmojiToNextLineWhenNoPlaceFor2Cells() {
         String emoji = "😀";
 

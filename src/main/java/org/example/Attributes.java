@@ -32,8 +32,4 @@ public class Attributes {
     public void addStyle(Style style) {
         styles.add(style);
     }
-
-    public void removeStyle(Style style) {
-        styles.remove(style);
-    }
 }

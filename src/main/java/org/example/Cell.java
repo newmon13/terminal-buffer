@@ -11,10 +11,6 @@ public class Cell {
 
     }
 
-    public Cell(String character) {
-        this.character = character;
-    }
-
     public String getCharacter() {
         return character;
     }
@@ -29,11 +25,6 @@ public class Cell {
 
     public void setAttributes(Attributes attributes) {
         this.attributes = attributes;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + character +"]";
     }
 
     public boolean isBlocked() {

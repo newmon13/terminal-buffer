@@ -157,12 +157,6 @@ public class TerminalBuffer {
         return builder + screenContent;
     }
 
-
-
-    public int getScreenSize() {
-        return screen.size();
-    }
-
     public ArrayDeque<Line> getScrollback() {
         return this.scrollback;
     }
@@ -204,16 +198,5 @@ public class TerminalBuffer {
 
     public Cursor getCursor() {
         return cursor;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-
-        for (Line line: screen) {
-            builder.append( line.toString()).append("\n");
-        }
-
-        return builder.toString();
     }
 }
