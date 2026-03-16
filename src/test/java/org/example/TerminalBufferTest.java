@@ -24,6 +24,19 @@ public class TerminalBufferTest{
     }
 
     @Test
+    void shouldShiftEmojiToNextLineWhenNoPlaceFor2Cells() {
+        String emoji = "😀";
+
+        terminalBuffer.getCursor().setX(SCREEN_WIDTH - 1);
+
+        terminalBuffer.insert(emoji);
+
+        String result = terminalBuffer.getLineAtScreen(1).toString();
+        assertEquals(emoji, result);
+        assertTrue(terminalBuffer.getLineAtScreen(1).getCell(1).isBlocked());
+    }
+
+    @Test
     void shouldShiftLineBy2WhenInsertingEmoji() {
         String emoji = "😀";
 

@@ -49,6 +49,11 @@ public class TerminalBuffer {
         for (int codePoint : text.codePoints().toArray()) {
             boolean isWide = codePoint > 0xFFFF;
             int cellCount = isWide ? 2 : 1;
+
+            if (isWide && cursor.getX() == width - 1) {
+                cursor.moveRightWithWrap(1);
+            }
+
             int pos = cursor.getX() + cursor.getY() * width;
 
             shiftScreenRight(pos, cellCount);
