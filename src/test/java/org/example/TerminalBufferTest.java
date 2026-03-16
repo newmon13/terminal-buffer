@@ -74,6 +74,23 @@ public class TerminalBufferTest{
         assertEquals('d', character);
     }
 
+    @Test void shouldFillLineWithCharacter() {
+        Character character = '#';
+
+        terminalBuffer.fillLineWith(character);
+
+        assertEquals("##########", terminalBuffer.getLine(terminalBuffer.getCursor().getY()));
+    }
+
+    @Test void shouldFillLineWithCharacterAndOverrideExistingContent() {
+        Character character = '#';
+
+        terminalBuffer.write("Hello World");
+        terminalBuffer.fillLineWith(character);
+
+        assertEquals("##########", terminalBuffer.getLine(terminalBuffer.getCursor().getY()));
+    }
+
 
     @Test
     public void shouldStampCurrentAttributesOnWrittenCells() {

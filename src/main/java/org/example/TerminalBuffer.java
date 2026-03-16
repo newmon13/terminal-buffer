@@ -62,6 +62,14 @@ public class TerminalBuffer {
         }
     }
 
+    public void fillLineWith(Character character) {
+        Line line = screen.get(cursor.getY());
+        for (int i = 0; i < line.getWidth(); i++) {
+            line.getCell(i).setCharacter(character);
+            line.getCell(i).setAttributes(currentAttributes);
+        }
+    }
+
     private Cell shiftLineRight(Line line, int index) {
         Cell last = line.getCell(line.getWidth() - 1);
         Cell overflow = new Cell(last.getCharacter());
