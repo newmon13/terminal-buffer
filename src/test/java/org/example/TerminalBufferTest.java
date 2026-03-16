@@ -4,6 +4,8 @@ package org.example;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayDeque;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -99,6 +101,24 @@ public class TerminalBufferTest{
         terminalBuffer.fillLineWith(character);
 
         assertEquals("##########", terminalBuffer.getLine(terminalBuffer.getCursor().getY()));
+    }
+
+    @Test
+    void shouldAddEmptyLine() {
+        String text = "HelloWorld";
+        terminalBuffer.write(text);
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        int scrollbackSize = terminalBuffer.getScrollbackSize();
+        String screenContent = terminalBuffer.getScreenContent();
+
+
+        assertEquals("", screenContent);
+        assertEquals(1, scrollbackSize);
+
+        ArrayDeque<Line> scrollback = terminalBuffer.getScrollback();
+
+        assertEquals(text, scrollback.peek().toString());
     }
 
 

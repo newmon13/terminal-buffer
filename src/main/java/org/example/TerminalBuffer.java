@@ -7,27 +7,25 @@ import java.util.List;
 
 public class TerminalBuffer {
 
-    private List<Line> screen = new ArrayList<>();
+    private List<Line> screen;
     private ArrayDeque<Line> scrollback = new ArrayDeque<>();
     private int scrollbackMaxSize;
     private int width;
+    private int height;
 
     private Cursor cursor;
     private Attributes currentAttributes = new Attributes();
 
-    public void setAttributes(Attributes attributes) {
-        this.currentAttributes = attributes;
-    }
-
     public void setup(int width, int height, int scrollbackSize) {
         this.width = width;
+        this.height = height;
         this.scrollbackMaxSize = scrollbackSize;
+        this.screen = new ArrayList<>(width);
+        this.cursor = new Cursor(width, height);
 
         for (int i = 0; i < height; i++) {
             screen.add(new Line(width));
         }
-
-        this.cursor = new Cursor(width, height);
     }
 
     public void write(String text) {
@@ -81,6 +79,22 @@ public class TerminalBuffer {
         }
     }
 
+    public void insertEmptyLineAtTheBottomOfScreen() {
+        Line newLine = new Line(width);
+
+        if (screen.size() >= height) {
+            Line oldestLine = screen.get(0);
+
+            if (scrollback.size() >= scrollbackMaxSize) {
+                scrollback.pop();
+            }
+            scrollback.add(oldestLine);
+            screen.remove(0);
+        }
+
+        screen.add(newLine);
+    }
+
     private Cell shiftLineRight(Line line, int index) {
         Cell last = line.getCell(line.getWidth() - 1);
         Cell overflow = new Cell(last.getCharacter());
@@ -106,6 +120,18 @@ public class TerminalBuffer {
         return builder.toString();
     }
 
+    public int getScreenSize() {
+        return screen.size();
+    }
+
+    public ArrayDeque<Line> getScrollback() {
+        return this.scrollback;
+    }
+
+    public int getScrollbackSize() {
+        return scrollback.size();
+    }
+
     public String getLine(int y) {
         return screen.get(y).toString();
     }
@@ -116,6 +142,10 @@ public class TerminalBuffer {
 
     public Attributes getAttributes(int x, int y) {
         return screen.get(y).getCell(x).getAttributes();
+    }
+
+    public void setAttributes(Attributes attributes) {
+        this.currentAttributes = attributes;
     }
 
     public Cursor getCursor() {
