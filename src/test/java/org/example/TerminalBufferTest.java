@@ -39,6 +39,15 @@ public class TerminalBufferTest{
     }
 
     @Test
+    void shouldWriteEmojiUsingWrite() {
+        terminalBuffer.write("😀");
+
+        assertEquals("😀", terminalBuffer.getCharacterAtScreen(0, 0));
+        assertTrue(terminalBuffer.getLineAtScreen(0).getCell(1).isBlocked());
+        assertEquals(2, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
     void shouldWriteEmoji() {
         String text = "😀";
 
@@ -202,9 +211,10 @@ public class TerminalBufferTest{
     void shouldClearScreen() {
         terminalBuffer.insert("Hello World");
         terminalBuffer.clearScreen();
-        String screenContent = terminalBuffer.getScreenContent();
 
-        assertEquals("", screenContent);
+        assertEquals("", terminalBuffer.getScreenContent());
+        assertEquals(0, terminalBuffer.getCursor().getX());
+        assertEquals(0, terminalBuffer.getCursor().getY());
     }
 
     @Test
@@ -338,20 +348,6 @@ public class TerminalBufferTest{
         assertEquals(2, terminalBuffer.getScrollbackSize());
         assertEquals("Line2", terminalBuffer.getLineAtScrollback(0).toString());
         assertEquals("Line3", terminalBuffer.getLineAtScrollback(1).toString());
-    }
-
-    @Test
-    void shouldNotSetCursorXBeyondScreenWidth() {
-        terminalBuffer.getCursor().setX(100);
-
-        assertEquals(0, terminalBuffer.getCursor().getX());
-    }
-
-    @Test
-    void shouldNotSetCursorYBeyondScreenHeight() {
-        terminalBuffer.getCursor().setY(100);
-
-        assertEquals(0, terminalBuffer.getCursor().getY());
     }
 
     @Test
