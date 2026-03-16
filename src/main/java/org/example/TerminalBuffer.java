@@ -62,6 +62,17 @@ public class TerminalBuffer {
         }
     }
 
+    public void clearScreen() {
+        for (Line line : screen) {
+            for (int j = 0; j < line.getWidth(); j++) {
+                Cell cell = line.getCell(j);
+                cell.setCharacter(null);
+            }
+        }
+        cursor.setX(0);
+        cursor.setY(0);
+    }
+
     public void fillLineWith(Character character) {
         Line line = screen.get(cursor.getY());
         for (int i = 0; i < line.getWidth(); i++) {

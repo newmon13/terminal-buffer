@@ -68,13 +68,22 @@ public class TerminalBufferTest{
         terminalBuffer.getCursor().setX(0);
         terminalBuffer.insert(hello);
 
-        System.out.println(terminalBuffer.toString());
-
         Character character = terminalBuffer.getCharacter(0, 1);
         assertEquals('d', character);
     }
 
-    @Test void shouldFillLineWithCharacter() {
+
+    @Test
+    void shouldClearScreen() {
+        terminalBuffer.insert("Hello World");
+        terminalBuffer.clearScreen();
+        String screenContent = terminalBuffer.getScreenContent();
+
+        assertEquals("", screenContent);
+    }
+
+    @Test
+    void shouldFillLineWithCharacter() {
         Character character = '#';
 
         terminalBuffer.fillLineWith(character);
@@ -82,7 +91,8 @@ public class TerminalBufferTest{
         assertEquals("##########", terminalBuffer.getLine(terminalBuffer.getCursor().getY()));
     }
 
-    @Test void shouldFillLineWithCharacterAndOverrideExistingContent() {
+    @Test
+    void shouldFillLineWithCharacterAndOverrideExistingContent() {
         Character character = '#';
 
         terminalBuffer.write("Hello World");
