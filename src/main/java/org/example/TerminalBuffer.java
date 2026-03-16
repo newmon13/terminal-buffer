@@ -29,35 +29,67 @@ public class TerminalBuffer {
     }
 
     public void write(String text) {
-        for(Character character: text.toCharArray()) {
+        for(int codePoint: text.codePoints().toArray()) {
             Line line = screen.get(cursor.getY());
             Cell cell = line.getCell(cursor.getX());
-            cell.setCharacter(character);
+            cell.setCharacter(new String(Character.toChars(codePoint)));
             cell.setAttributes(currentAttributes);
+
+            if (codePoint > 0xFFFF) {
+                cursor.moveRight(1);
+                Cell neighbour = screen.get(cursor.getY()).getCell(cursor.getX());
+                neighbour.setBlocked(true);
+            }
+
             cursor.moveRight(1);
         }
     }
 
     public void insert(String text) {
-        for (Character character: text.toCharArray()) {
-            int row = cursor.getY();
+        for (int codePoint : text.codePoints().toArray()) {
+            boolean isWide = codePoint > 0xFFFF;
+            int cellCount = isWide ? 2 : 1;
 
-            Cell overflow = shiftLineRight(screen.get(row), cursor.getX());
-            Cell cell = screen.get(row).getCell(cursor.getX());
-            cell.setCharacter(character);
+            if (isWide && cursor.getX() == width - 1) {
+                cursor.moveRightWithWrap(1);
+            }
+
+            int pos = cursor.getX() + cursor.getY() * width;
+
+            shiftScreenRight(pos, cellCount);
+
+            Cell cell = getCell(pos);
+            cell.setCharacter(new String(Character.toChars(codePoint)));
             cell.setAttributes(currentAttributes);
 
-            cursor.moveRightWithWrap(1);
-
-            row++;
-            while (overflow != null && row < screen.size()) {
-                Cell oldOverflow = overflow;
-                overflow = shiftLineRight(screen.get(row), 0);
-                screen.get(row).getCell(0).setCharacter(oldOverflow.getCharacter());
-                screen.get(row).getCell(0).setAttributes(oldOverflow.getAttributes());
-                row++;
+            if (isWide) {
+                getCell(pos + 1).setBlocked(true);
             }
+
+            cursor.moveRightWithWrap(cellCount);
         }
+    }
+
+    private void shiftScreenRight(int from, int count) {
+        int total = width * height;
+        for (int i = total - 1; i >= from + count; i--) {
+            copy(getCell(i - count), getCell(i));
+        }
+        for (int i = from; i < from + count; i++) {
+            getCell(i).setCharacter(null);
+            getCell(i).setAttributes(null);
+            getCell(i).setBlocked(false);
+        }
+    }
+
+    private Cell getCell(int pos) {
+        return screen.get(pos / width).getCell(pos % width);
+    }
+
+    private void copy(Cell src, Cell dst) {
+        dst.setCharacter(src.getCharacter());
+        dst.setAttributes(src.getAttributes());
+        dst.setBlocked(src.isBlocked());
     }
 
     public void clearScreen() {
@@ -76,7 +108,7 @@ public class TerminalBuffer {
         scrollback.clear();
     }
 
-    public void fillLineWith(Character character) {
+    public void fillLineWith(String character) {
         Line line = screen.get(cursor.getY());
         for (int i = 0; i < line.getWidth(); i++) {
             line.getCell(i).setCharacter(character);
@@ -100,19 +132,6 @@ public class TerminalBuffer {
         screen.add(newLine);
     }
 
-    private Cell shiftLineRight(Line line, int index) {
-        Cell last = line.getCell(line.getWidth() - 1);
-        Cell overflow = new Cell(last.getCharacter());
-        overflow.setAttributes(last.getAttributes());
-
-        for (int i = line.getWidth() - 1; i > index; i--) {
-            Cell prev = line.getCell(i - 1);
-            line.getCell(i).setCharacter(prev.getCharacter());
-            line.getCell(i).setAttributes(prev.getAttributes());
-        }
-
-        return overflow.getCharacter() == null ? null : overflow;
-    }
 
 
     public String getScreenContent() {
@@ -138,12 +157,6 @@ public class TerminalBuffer {
         return builder + screenContent;
     }
 
-
-
-    public int getScreenSize() {
-        return screen.size();
-    }
-
     public ArrayDeque<Line> getScrollback() {
         return this.scrollback;
     }
@@ -161,11 +174,11 @@ public class TerminalBuffer {
         return lines[y];
     }
 
-    public Character getCharacterAtScreen(int x, int y) {
+    public String getCharacterAtScreen(int x, int y) {
         return screen.get(y).getCell(x).getCharacter();
     }
 
-    public Character getCharacterAtScrollback(int x, int y) {
+    public String getCharacterAtScrollback(int x, int y) {
         Line[] lines = scrollback.toArray(new Line[0]);
         return lines[y].getCell(x).getCharacter();
     }
@@ -185,16 +198,5 @@ public class TerminalBuffer {
 
     public Cursor getCursor() {
         return cursor;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-
-        for (Line line: screen) {
-            builder.append( line.toString()).append("\n");
-        }
-
-        return builder.toString();
     }
 }
