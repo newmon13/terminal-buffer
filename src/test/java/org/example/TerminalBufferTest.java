@@ -51,6 +51,29 @@ public class TerminalBufferTest{
         assertEquals(hello + world, content);
     }
 
+    @Test
+    public void shouldInsertTextAndWrapLines() {
+        String helloWorld = "Hello World";
+        terminalBuffer.insert(helloWorld);
+
+        Character character = terminalBuffer.getCharacter(0, 1);
+        assertEquals('d', character);
+    }
+
+    @Test
+    public void shouldPushBackAndWrapExistingTextWhenInsertingNew() {
+        String hello = "Hello ";
+        String world = "World";
+        terminalBuffer.insert(world);
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.insert(hello);
+
+        System.out.println(terminalBuffer.toString());
+
+        Character character = terminalBuffer.getCharacter(0, 1);
+        assertEquals('d', character);
+    }
+
 
     @Test
     public void shouldStampCurrentAttributesOnWrittenCells() {

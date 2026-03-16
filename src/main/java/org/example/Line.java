@@ -18,6 +18,10 @@ public class Line {
         return line[position];
     }
 
+    public int getWidth() {
+        return line.length;
+    }
+
 //    @Override
 //    public String toString() {
 //        StringBuilder builder = new StringBuilder();

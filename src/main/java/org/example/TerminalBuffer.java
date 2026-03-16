@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class TerminalBuffer {
 
     private List<Line> screen = new ArrayList<>();
@@ -37,6 +38,42 @@ public class TerminalBuffer {
             cell.setAttributes(currentAttributes);
             cursor.moveRight(1);
         }
+    }
+
+    public void insert(String text) {
+        for (Character character: text.toCharArray()) {
+            int row = cursor.getY();
+
+            Cell overflow = shiftLineRight(screen.get(row), cursor.getX());
+            Cell cell = screen.get(row).getCell(cursor.getX());
+            cell.setCharacter(character);
+            cell.setAttributes(currentAttributes);
+
+            cursor.moveRightWithWrap(1);
+
+            row++;
+            while (overflow != null) {
+                Cell oldOverflow = overflow;
+                overflow = shiftLineRight(screen.get(row), 0);
+                screen.get(row).getCell(0).setCharacter(oldOverflow.getCharacter());
+                screen.get(row).getCell(0).setAttributes(oldOverflow.getAttributes());
+                row++;
+            }
+        }
+    }
+
+    private Cell shiftLineRight(Line line, int index) {
+        Cell last = line.getCell(line.getWidth() - 1);
+        Cell overflow = new Cell(last.getCharacter());
+        overflow.setAttributes(last.getAttributes());
+
+        for (int i = line.getWidth() - 1; i > index; i--) {
+            Cell prev = line.getCell(i - 1);
+            line.getCell(i).setCharacter(prev.getCharacter());
+            line.getCell(i).setAttributes(prev.getAttributes());
+        }
+
+        return overflow.getCharacter() == null ? null : overflow;
     }
 
 

@@ -33,9 +33,27 @@ public class Cursor {
         }
     }
 
+    public void moveRightWithWrap(int n) {
+        if (this.x + n < xBoundary) {
+            this.x = this.x + n;
+        } else {
+            this.y = this.y + 1;
+            this.x = 0;
+        }
+    }
+
     public void moveLeft(int n) {
         if (this.x - n >= 0) {
             this.x = this.x - n;
+        }
+    }
+
+    public void moveLeftWithWrap(int n) {
+        if (this.x - n >= 0) {
+            this.x = this.x - n;
+        } else {
+            this.y = this.y - 1;
+            this.x = this.xBoundary - 1;
         }
     }
 
