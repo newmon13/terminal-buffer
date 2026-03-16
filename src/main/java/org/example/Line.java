@@ -1,7 +1,5 @@
 package org.example;
 
-import java.util.Arrays;
-
 public class Line {
 
     private final Cell[] line;
@@ -21,19 +19,6 @@ public class Line {
     public int getWidth() {
         return line.length;
     }
-
-//    @Override
-//    public String toString() {
-//        StringBuilder builder = new StringBuilder();
-//
-//        for (Cell cell : line) {
-//            builder.append(cell.toString()).append(",");
-//        }
-//
-//        builder.deleteCharAt(builder.length() - 1);
-//
-//        return builder.toString();
-//    }
 
     @Override
     public String toString() {

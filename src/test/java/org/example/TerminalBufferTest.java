@@ -12,11 +12,87 @@ public class TerminalBufferTest{
 
     TerminalBuffer terminalBuffer;
 
+    private static final int SCREEN_WIDTH = 10;
+    private static final int SCREEN_HEIGHT = 4;
+    private static final int SCROLLBACK_SIZE = 4;
+
     @BeforeEach
     public void setUp() {
         terminalBuffer = new TerminalBuffer();
-        terminalBuffer.setup(10, 4, 4);
+        terminalBuffer.setup(SCREEN_WIDTH, SCREEN_HEIGHT, SCROLLBACK_SIZE);
 
+    }
+
+    @Test
+    void shouldNotThrowWhenMovingBeyondBoundaries() {
+        assertDoesNotThrow(()-> {
+            terminalBuffer.getCursor().moveRight(SCREEN_WIDTH + 5);
+            terminalBuffer.getCursor().moveLeft(-5);
+            terminalBuffer.getCursor().moveUp(-5);
+            terminalBuffer.getCursor().moveDown(SCREEN_HEIGHT + 5);
+            terminalBuffer.getCursor().moveRightWithWrap(SCREEN_WIDTH * SCREEN_HEIGHT);
+            terminalBuffer.getCursor().moveLeftWithWrap(-SCREEN_WIDTH * SCREEN_HEIGHT);
+        });
+
+        assertEquals(SCREEN_WIDTH - 1, terminalBuffer.getCursor().getX());
+        assertEquals(SCREEN_HEIGHT - 1, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldWrapRightToNextLine() {
+        terminalBuffer.getCursor().moveRight(SCREEN_WIDTH - 1);
+        terminalBuffer.getCursor().moveRightWithWrap(1);
+
+        assertEquals(0, terminalBuffer.getCursor().getX());
+        assertEquals(1, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldCarryRemainingStepsToNextLineWhenWrappingRight() {
+        terminalBuffer.getCursor().moveRightWithWrap(SCREEN_WIDTH + 3);
+
+        assertEquals(3, terminalBuffer.getCursor().getX());
+        assertEquals(1, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldWrapLeftToPreviousLine() {
+        terminalBuffer.getCursor().moveDown(1);
+        terminalBuffer.getCursor().moveLeftWithWrap(1);
+
+        assertEquals(SCREEN_WIDTH - 1, terminalBuffer.getCursor().getX());
+        assertEquals(0, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldClampToOriginWhenWrappingLeftBeyondBoundary() {
+        terminalBuffer.getCursor().moveRightWithWrap(5);
+        terminalBuffer.getCursor().moveLeftWithWrap(10);
+
+        assertEquals(0, terminalBuffer.getCursor().getX());
+        assertEquals(0, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldClampToLastCellWhenWrappingRightBeyondBoundary() {
+        terminalBuffer.getCursor().moveRightWithWrap(SCREEN_WIDTH * SCREEN_HEIGHT);
+
+        assertEquals(SCREEN_WIDTH - 1, terminalBuffer.getCursor().getX());
+        assertEquals(SCREEN_HEIGHT - 1, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
+    void shouldNotSetXBeyondScreenWidth() {
+        terminalBuffer.getCursor().setX(SCREEN_WIDTH + 5);
+
+        assertEquals(0, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
+    void shouldNotSetYBeyondScreenHeight() {
+        terminalBuffer.getCursor().setY(SCREEN_HEIGHT + 5);
+
+        assertEquals(0, terminalBuffer.getCursor().getY());
     }
 
     @Test
@@ -131,8 +207,6 @@ public class TerminalBufferTest{
         terminalBuffer.insert(text);
 
         String screenContent = terminalBuffer.getScreenContent();
-
-        System.out.println(screenContent);
 
         assertEquals(expectedText, screenContent);
     }
