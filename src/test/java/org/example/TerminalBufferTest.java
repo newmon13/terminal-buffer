@@ -24,6 +24,52 @@ public class TerminalBufferTest{
     }
 
     @Test
+    void shouldShiftLineBy2WhenInsertingEmoji() {
+        String emoji = "😀";
+
+        terminalBuffer.write("AB");
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.getCursor().setY(0);
+        terminalBuffer.insert(emoji);
+
+        assertEquals(emoji, terminalBuffer.getCharacterAtScreen(0, 0));
+        assertTrue(terminalBuffer.getLineAtScreen(0).getCell(1).isBlocked());
+        assertEquals("A", terminalBuffer.getCharacterAtScreen(2, 0));
+        assertEquals("B", terminalBuffer.getCharacterAtScreen(3, 0));
+    }
+
+    @Test
+    void shouldWriteEmoji() {
+        String text = "😀";
+
+        terminalBuffer.insert(text);
+        Line lineAtScreen = terminalBuffer.getLineAtScreen(terminalBuffer.getCursor().getY());
+
+        assertEquals(text, terminalBuffer.getScreenContent());
+        assertTrue(lineAtScreen.getCell(1).isBlocked());
+        assertEquals(2, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
+    void shouldInsertEmoji() {
+        String text = "Hello World";
+        String emoji = "😀";
+
+        String expectedResult = "Hello😀 World";
+
+        terminalBuffer.insert(text);
+        terminalBuffer.getCursor().setX(5);
+        terminalBuffer.getCursor().setY(0);
+        terminalBuffer.insert(emoji);
+
+        Line lineAtScreen = terminalBuffer.getLineAtScreen(terminalBuffer.getCursor().getY());
+
+        assertEquals(expectedResult, terminalBuffer.getScreenContent());
+        assertTrue(lineAtScreen.getCell(6).isBlocked());
+        assertEquals(7, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
     void shouldNotThrowWhenMovingBeyondBoundaries() {
         assertDoesNotThrow(()-> {
             terminalBuffer.getCursor().moveRight(SCREEN_WIDTH + 5);
@@ -99,8 +145,8 @@ public class TerminalBufferTest{
     public void shouldWriteTextToSpecifiedLine() {
         terminalBuffer.write("Hello");
 
-        assertEquals('H', terminalBuffer.getCharacterAtScreen(0, 0).charValue());
-        assertEquals('o', terminalBuffer.getCharacterAtScreen(4, 0).charValue());
+        assertEquals("H", terminalBuffer.getCharacterAtScreen(0, 0));
+        assertEquals("o", terminalBuffer.getCharacterAtScreen(4, 0));
     }
 
     @Test
@@ -133,8 +179,8 @@ public class TerminalBufferTest{
         String helloWorld = "Hello World";
         terminalBuffer.insert(helloWorld);
 
-        Character character = terminalBuffer.getCharacterAtScreen(0, 1);
-        assertEquals('d', character);
+        String character = terminalBuffer.getCharacterAtScreen(0, 1);
+        assertEquals("d", character);
     }
 
     @Test
@@ -145,8 +191,8 @@ public class TerminalBufferTest{
         terminalBuffer.getCursor().setX(0);
         terminalBuffer.insert(hello);
 
-        Character character = terminalBuffer.getCharacterAtScreen(0, 1);
-        assertEquals('d', character);
+        String character = terminalBuffer.getCharacterAtScreen(0, 1);
+        assertEquals("d", character);
     }
 
 
@@ -161,7 +207,7 @@ public class TerminalBufferTest{
 
     @Test
     void shouldFillLineWithCharacter() {
-        Character character = '#';
+        String character = "#";
 
         terminalBuffer.fillLineWith(character);
 
@@ -170,7 +216,7 @@ public class TerminalBufferTest{
 
     @Test
     void shouldFillLineWithCharacterAndOverrideExistingContent() {
-        Character character = '#';
+        String character = "#";
 
         terminalBuffer.write("Hello World");
         terminalBuffer.fillLineWith(character);
@@ -237,7 +283,7 @@ public class TerminalBufferTest{
         terminalBuffer.write("Hello");
         terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
 
-        assertEquals('H', terminalBuffer.getCharacterAtScrollback(0, 0).charValue());
+        assertEquals("H", terminalBuffer.getCharacterAtScrollback(0, 0));
     }
 
     @Test
@@ -268,7 +314,7 @@ public class TerminalBufferTest{
     void shouldFillLineWithEmptyCharacter() {
         terminalBuffer.write("HelloWorld");
         terminalBuffer.getCursor().setX(0);
-        terminalBuffer.fillLineWith(null);
+        terminalBuffer.fillLineWith("");
 
         assertEquals("", terminalBuffer.getLineAtScreen(0).toString());
     }

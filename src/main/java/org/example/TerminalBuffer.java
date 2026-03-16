@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -29,25 +30,44 @@ public class TerminalBuffer {
     }
 
     public void write(String text) {
-        for(Character character: text.toCharArray()) {
+        for(int codePoint: text.codePoints().toArray()) {
             Line line = screen.get(cursor.getY());
             Cell cell = line.getCell(cursor.getX());
-            cell.setCharacter(character);
+            cell.setCharacter(new String(Character.toChars(codePoint)));
             cell.setAttributes(currentAttributes);
+
+            if (codePoint > 0xFFFF) {
+                cursor.moveRight(1);
+                Cell neighbour = screen.get(cursor.getY()).getCell(cursor.getX());
+                neighbour.setBlocked(true);
+            }
+
             cursor.moveRight(1);
         }
     }
 
     public void insert(String text) {
-        for (Character character: text.toCharArray()) {
+        for (int codePoint: text.codePoints().toArray()) {
             int row = cursor.getY();
 
             Cell overflow = shiftLineRight(screen.get(row), cursor.getX());
+            if (codePoint > 0xFFFF) {
+                overflow = shiftLineRight(screen.get(row), cursor.getX());
+            }
+
             Cell cell = screen.get(row).getCell(cursor.getX());
-            cell.setCharacter(character);
+            cell.setCharacter(new String(Character.toChars(codePoint)));
             cell.setAttributes(currentAttributes);
 
+
+            if (codePoint > 0xFFFF) {
+                cursor.moveRightWithWrap(1);
+                Cell neighbour = screen.get(row).getCell(cursor.getX());
+                neighbour.setBlocked(true);
+            }
+
             cursor.moveRightWithWrap(1);
+
 
             row++;
             while (overflow != null && row < screen.size()) {
@@ -76,7 +96,7 @@ public class TerminalBuffer {
         scrollback.clear();
     }
 
-    public void fillLineWith(Character character) {
+    public void fillLineWith(String character) {
         Line line = screen.get(cursor.getY());
         for (int i = 0; i < line.getWidth(); i++) {
             line.getCell(i).setCharacter(character);
@@ -104,11 +124,14 @@ public class TerminalBuffer {
         Cell last = line.getCell(line.getWidth() - 1);
         Cell overflow = new Cell(last.getCharacter());
         overflow.setAttributes(last.getAttributes());
+        overflow.setBlocked(last.isBlocked());
+
 
         for (int i = line.getWidth() - 1; i > index; i--) {
             Cell prev = line.getCell(i - 1);
             line.getCell(i).setCharacter(prev.getCharacter());
             line.getCell(i).setAttributes(prev.getAttributes());
+            line.getCell(i).setBlocked(prev.isBlocked());
         }
 
         return overflow.getCharacter() == null ? null : overflow;
@@ -161,11 +184,11 @@ public class TerminalBuffer {
         return lines[y];
     }
 
-    public Character getCharacterAtScreen(int x, int y) {
+    public String getCharacterAtScreen(int x, int y) {
         return screen.get(y).getCell(x).getCharacter();
     }
 
-    public Character getCharacterAtScrollback(int x, int y) {
+    public String getCharacterAtScrollback(int x, int y) {
         Line[] lines = scrollback.toArray(new Line[0]);
         return lines[y].getCell(x).getCharacter();
     }

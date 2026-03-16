@@ -2,7 +2,8 @@ package org.example;
 
 public class Cell {
 
-    private Character character;
+    private String character;
+    private boolean isBlocked;
     private Attributes attributes;
 
 
@@ -10,15 +11,15 @@ public class Cell {
 
     }
 
-    public Cell(Character character) {
+    public Cell(String character) {
         this.character = character;
     }
 
-    public Character getCharacter() {
+    public String getCharacter() {
         return character;
     }
 
-    public void setCharacter(Character character) {
+    public void setCharacter(String character) {
         this.character = character;
     }
 
@@ -33,5 +34,13 @@ public class Cell {
     @Override
     public String toString() {
         return "[" + character +"]";
+    }
+
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 }
