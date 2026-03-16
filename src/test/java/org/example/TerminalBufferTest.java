@@ -99,8 +99,8 @@ public class TerminalBufferTest{
     public void shouldWriteTextToSpecifiedLine() {
         terminalBuffer.write("Hello");
 
-        assertEquals('H', terminalBuffer.getCharacter(0, 0).charValue());
-        assertEquals('o', terminalBuffer.getCharacter(4, 0).charValue());
+        assertEquals('H', terminalBuffer.getCharacterAtScreen(0, 0).charValue());
+        assertEquals('o', terminalBuffer.getCharacterAtScreen(4, 0).charValue());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class TerminalBufferTest{
         String hello = "Hello";
         terminalBuffer.write(hello);
 
-        String line = terminalBuffer.getLine(0);
+        String line = terminalBuffer.getLineAtScreen(0).toString();
 
         assertEquals(hello, line);
     }
@@ -133,7 +133,7 @@ public class TerminalBufferTest{
         String helloWorld = "Hello World";
         terminalBuffer.insert(helloWorld);
 
-        Character character = terminalBuffer.getCharacter(0, 1);
+        Character character = terminalBuffer.getCharacterAtScreen(0, 1);
         assertEquals('d', character);
     }
 
@@ -145,7 +145,7 @@ public class TerminalBufferTest{
         terminalBuffer.getCursor().setX(0);
         terminalBuffer.insert(hello);
 
-        Character character = terminalBuffer.getCharacter(0, 1);
+        Character character = terminalBuffer.getCharacterAtScreen(0, 1);
         assertEquals('d', character);
     }
 
@@ -165,7 +165,7 @@ public class TerminalBufferTest{
 
         terminalBuffer.fillLineWith(character);
 
-        assertEquals("##########", terminalBuffer.getLine(terminalBuffer.getCursor().getY()));
+        assertEquals("##########", terminalBuffer.getLineAtScreen(terminalBuffer.getCursor().getY()).toString());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class TerminalBufferTest{
         terminalBuffer.write("Hello World");
         terminalBuffer.fillLineWith(character);
 
-        assertEquals("##########", terminalBuffer.getLine(terminalBuffer.getCursor().getY()));
+        assertEquals("##########", terminalBuffer.getLineAtScreen(terminalBuffer.getCursor().getY()).toString());
     }
 
     @Test
@@ -213,6 +213,100 @@ public class TerminalBufferTest{
 
 
     @Test
+    void shouldClearScreenAndScrollback() {
+        terminalBuffer.write("HelloWorld");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        terminalBuffer.clearScreenAndScrollback();
+
+        assertEquals("", terminalBuffer.getScreenContent());
+        assertEquals(0, terminalBuffer.getScrollbackSize());
+    }
+
+    @Test
+    void shouldReturnLineAtScrollback() {
+        String text = "HelloWorld";
+        terminalBuffer.write(text);
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        assertEquals(text, terminalBuffer.getLineAtScrollback(0).toString());
+    }
+
+    @Test
+    void shouldReturnCharacterAtScrollback() {
+        terminalBuffer.write("Hello");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        assertEquals('H', terminalBuffer.getCharacterAtScrollback(0, 0).charValue());
+    }
+
+    @Test
+    void shouldReturnAttributesAtScrollback() {
+        Attributes attrs = new Attributes();
+        attrs.setForeground(Color.RED);
+        terminalBuffer.setAttributes(attrs);
+        terminalBuffer.write("Hi");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        assertEquals(Color.RED, terminalBuffer.getAttributesAtScrollback(0, 0).getForeground());
+    }
+
+    @Test
+    void shouldReturnScreenAndScrollbackContent() {
+        terminalBuffer.write("HelloWorld");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.getCursor().setY(0);
+        terminalBuffer.write("HelloWorld");
+
+        String content = terminalBuffer.getScreenAndScrollbackContent();
+
+        assertEquals("HelloWorldHelloWorld", content);
+    }
+
+    @Test
+    void shouldFillLineWithEmptyCharacter() {
+        terminalBuffer.write("HelloWorld");
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.fillLineWith(null);
+
+        assertEquals("", terminalBuffer.getLineAtScreen(0).toString());
+    }
+
+    @Test
+    void shouldRemoveOldestLineFromScrollbackWhenFull() {
+        terminalBuffer = new TerminalBuffer();
+        terminalBuffer.setup(10, 1, 2);
+
+        terminalBuffer.write("Line1");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.write("Line2");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+        terminalBuffer.getCursor().setX(0);
+        terminalBuffer.write("Line3");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        assertEquals(2, terminalBuffer.getScrollbackSize());
+        assertEquals("Line2", terminalBuffer.getLineAtScrollback(0).toString());
+        assertEquals("Line3", terminalBuffer.getLineAtScrollback(1).toString());
+    }
+
+    @Test
+    void shouldNotSetCursorXBeyondScreenWidth() {
+        terminalBuffer.getCursor().setX(100);
+
+        assertEquals(0, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
+    void shouldNotSetCursorYBeyondScreenHeight() {
+        terminalBuffer.getCursor().setY(100);
+
+        assertEquals(0, terminalBuffer.getCursor().getY());
+    }
+
+    @Test
     public void shouldStampCurrentAttributesOnWrittenCells() {
         Attributes attrs = new Attributes();
         attrs.setForeground(Color.RED);
@@ -222,7 +316,7 @@ public class TerminalBufferTest{
         terminalBuffer.setAttributes(attrs);
         terminalBuffer.write("Hi");
 
-        Attributes cell0 = terminalBuffer.getAttributes(0, 0);
+        Attributes cell0 = terminalBuffer.getAttributesAtScreen(0, 0);
         assertEquals(Color.RED, cell0.getForeground());
         assertEquals(Color.BLUE, cell0.getBackground());
         assertTrue(cell0.getStyles().contains(Style.BOLD));
@@ -237,7 +331,7 @@ public class TerminalBufferTest{
         terminalBuffer.setAttributes(attrs);
         terminalBuffer.write("B");
 
-        assertEquals(Color.DEFAULT, terminalBuffer.getAttributes(0, 0).getForeground());
-        assertEquals(Color.GREEN, terminalBuffer.getAttributes(1, 0).getForeground());
+        assertEquals(Color.DEFAULT, terminalBuffer.getAttributesAtScreen(0, 0).getForeground());
+        assertEquals(Color.GREEN, terminalBuffer.getAttributesAtScreen(1, 0).getForeground());
     }
 }
