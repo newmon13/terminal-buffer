@@ -39,6 +39,17 @@ public class TerminalBuffer {
         }
     }
 
+
+    public String getScreenContent() {
+        StringBuilder builder = new StringBuilder();
+
+        for (Line line: screen) {
+            builder.append(line.toString());
+        }
+
+        return builder.toString();
+    }
+
     public String getLine(int y) {
         return screen.get(y).toString();
     }
@@ -49,6 +60,10 @@ public class TerminalBuffer {
 
     public Attributes getAttributes(int x, int y) {
         return screen.get(y).getCell(x).getAttributes();
+    }
+
+    public Cursor getCursor() {
+        return cursor;
     }
 
     @Override

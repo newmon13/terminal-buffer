@@ -36,6 +36,21 @@ public class TerminalBufferTest{
         assertEquals(hello, line);
     }
 
+    @Test
+    public void shouldReturnScreenContentAsString() {
+        String hello = "Hello";
+        String world = "World";
+        terminalBuffer.write(hello);
+
+        terminalBuffer.getCursor().moveDown(1);
+        terminalBuffer.write(world);
+
+
+        String content = terminalBuffer.getScreenContent();
+
+        assertEquals(hello + world, content);
+    }
+
 
     @Test
     public void shouldStampCurrentAttributesOnWrittenCells() {
