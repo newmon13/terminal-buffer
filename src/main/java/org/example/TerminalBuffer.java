@@ -2,7 +2,6 @@ package org.example;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -47,37 +46,45 @@ public class TerminalBuffer {
     }
 
     public void insert(String text) {
-        for (int codePoint: text.codePoints().toArray()) {
-            int row = cursor.getY();
+        for (int codePoint : text.codePoints().toArray()) {
+            boolean isWide = codePoint > 0xFFFF;
+            int cellCount = isWide ? 2 : 1;
+            int pos = cursor.getX() + cursor.getY() * width;
 
-            Cell overflow = shiftLineRight(screen.get(row), cursor.getX());
-            if (codePoint > 0xFFFF) {
-                overflow = shiftLineRight(screen.get(row), cursor.getX());
-            }
+            shiftScreenRight(pos, cellCount);
 
-            Cell cell = screen.get(row).getCell(cursor.getX());
+            Cell cell = getCell(pos);
             cell.setCharacter(new String(Character.toChars(codePoint)));
             cell.setAttributes(currentAttributes);
 
-
-            if (codePoint > 0xFFFF) {
-                cursor.moveRightWithWrap(1);
-                Cell neighbour = screen.get(row).getCell(cursor.getX());
-                neighbour.setBlocked(true);
+            if (isWide) {
+                getCell(pos + 1).setBlocked(true);
             }
 
-            cursor.moveRightWithWrap(1);
-
-
-            row++;
-            while (overflow != null && row < screen.size()) {
-                Cell oldOverflow = overflow;
-                overflow = shiftLineRight(screen.get(row), 0);
-                screen.get(row).getCell(0).setCharacter(oldOverflow.getCharacter());
-                screen.get(row).getCell(0).setAttributes(oldOverflow.getAttributes());
-                row++;
-            }
+            cursor.moveRightWithWrap(cellCount);
         }
+    }
+
+    private void shiftScreenRight(int from, int count) {
+        int total = width * height;
+        for (int i = total - 1; i >= from + count; i--) {
+            copy(getCell(i - count), getCell(i));
+        }
+        for (int i = from; i < from + count; i++) {
+            getCell(i).setCharacter(null);
+            getCell(i).setAttributes(null);
+            getCell(i).setBlocked(false);
+        }
+    }
+
+    private Cell getCell(int pos) {
+        return screen.get(pos / width).getCell(pos % width);
+    }
+
+    private void copy(Cell src, Cell dst) {
+        dst.setCharacter(src.getCharacter());
+        dst.setAttributes(src.getAttributes());
+        dst.setBlocked(src.isBlocked());
     }
 
     public void clearScreen() {
@@ -120,22 +127,6 @@ public class TerminalBuffer {
         screen.add(newLine);
     }
 
-    private Cell shiftLineRight(Line line, int index) {
-        Cell last = line.getCell(line.getWidth() - 1);
-        Cell overflow = new Cell(last.getCharacter());
-        overflow.setAttributes(last.getAttributes());
-        overflow.setBlocked(last.isBlocked());
-
-
-        for (int i = line.getWidth() - 1; i > index; i--) {
-            Cell prev = line.getCell(i - 1);
-            line.getCell(i).setCharacter(prev.getCharacter());
-            line.getCell(i).setAttributes(prev.getAttributes());
-            line.getCell(i).setBlocked(prev.isBlocked());
-        }
-
-        return overflow.getCharacter() == null ? null : overflow;
-    }
 
 
     public String getScreenContent() {

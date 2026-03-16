@@ -55,18 +55,20 @@ public class TerminalBufferTest{
         String text = "Hello World";
         String emoji = "😀";
 
-        String expectedResult = "Hello😀 World";
+        String expectedResult = "Hello 😀World";
 
         terminalBuffer.insert(text);
-        terminalBuffer.getCursor().setX(5);
+        terminalBuffer.getCursor().setX(6);
         terminalBuffer.getCursor().setY(0);
         terminalBuffer.insert(emoji);
 
         Line lineAtScreen = terminalBuffer.getLineAtScreen(terminalBuffer.getCursor().getY());
 
+        System.out.println(lineAtScreen);
+
         assertEquals(expectedResult, terminalBuffer.getScreenContent());
-        assertTrue(lineAtScreen.getCell(6).isBlocked());
-        assertEquals(7, terminalBuffer.getCursor().getX());
+        assertTrue(lineAtScreen.getCell(7).isBlocked());
+        assertEquals(8, terminalBuffer.getCursor().getX());
     }
 
     @Test

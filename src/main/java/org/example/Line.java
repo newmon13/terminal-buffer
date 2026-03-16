@@ -25,7 +25,7 @@ public class Line {
         StringBuilder builder = new StringBuilder();
 
         for (Cell cell : line) {
-            if (cell.getCharacter() != null) {
+            if (!cell.isBlocked() && cell.getCharacter() != null) {
                 builder.append(cell.getCharacter());
             }
         }
