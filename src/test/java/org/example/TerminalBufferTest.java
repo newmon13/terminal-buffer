@@ -443,4 +443,41 @@ public class TerminalBufferTest{
 
         assertEquals(SCREEN_HEIGHT - 1, terminalBuffer.getCursor().getY());
     }
+
+    @Test
+    public void shouldIncreaseScreenHeight() {
+
+        terminalBuffer.increaseScreenHeight(6);
+
+        int screenHeight = terminalBuffer.getScreenHeight();
+
+        assertEquals(10, screenHeight);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenIncreaseScreenHeightByNegativeNumber() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            terminalBuffer.increaseScreenHeight(-6);
+
+        });
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenIncreaseScreenHeightBeyondMaxHeight() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            terminalBuffer.increaseScreenHeight(200);
+
+        });
+    }
+
+    @Test
+    public void shouldMoveLineFromScrollbackToScreenWhenIncreaseSize() {
+        terminalBuffer.setup(1, 1, 1);
+        terminalBuffer.write("a");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+        terminalBuffer.write("a");
+        terminalBuffer.increaseScreenHeight(1);
+
+        assertEquals("aa", terminalBuffer.getScreenContent());
+    }
 }

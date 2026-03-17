@@ -7,8 +7,10 @@ import java.util.List;
 
 public class TerminalBuffer {
 
+    private final static int MAX_HEIGHT = 100;
+
     private List<Line> screen;
-    private ArrayDeque<Line> scrollback = new ArrayDeque<>();
+    private final ArrayDeque<Line> scrollback = new ArrayDeque<>();
     private int scrollbackMaxSize;
     private int width;
     private int height;
@@ -27,6 +29,46 @@ public class TerminalBuffer {
             screen.add(new Line(width));
         }
     }
+
+    public void increaseScreenHeight(int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("n must be positive");
+        }
+        if (screen.size() + n > MAX_HEIGHT) {
+            throw new IllegalArgumentException("Exceeded maximum screen height: " + MAX_HEIGHT);
+        }
+
+        height += n;
+
+        for (int i = 0; i < n; i++) {
+            if (!scrollback.isEmpty()) {
+                screen.add(scrollback.pollLast());
+            } else {
+                screen.add(new Line(width));
+            }
+        }
+    }
+
+    public void decreaseScreenHeight(int n) {
+
+        if (n <= 0) {
+            throw new IllegalArgumentException("n must be positive");
+        }
+        if (screen.size() - n < 1) {
+            throw new IllegalArgumentException("Screen height must be at least 1");
+        }
+
+        height -= n;
+
+        for (int i = 0; i < n; i++) {
+            if (scrollback.size() >= scrollbackMaxSize) {
+                scrollback.pop();
+            }
+            scrollback.add(screen.remove(0));
+        }
+    }
+
+
 
     public void write(String text) {
         for(int codePoint: text.codePoints().toArray()) {
@@ -198,5 +240,9 @@ public class TerminalBuffer {
 
     public Cursor getCursor() {
         return cursor;
+    }
+
+    public int getScreenHeight() {
+        return screen.size();
     }
 }
