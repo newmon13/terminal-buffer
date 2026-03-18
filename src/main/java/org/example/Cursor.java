@@ -88,6 +88,13 @@ public class Cursor {
         }
     }
 
+    public void setXBoundary(int xBoundary) {
+        this.xBoundary = xBoundary;
+        if (this.x >= xBoundary) {
+            this.x = xBoundary - 1;
+        }
+    }
+
     public int getY() {
         return y;
     }

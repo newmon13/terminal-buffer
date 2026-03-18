@@ -1,8 +1,10 @@
 package org.example;
 
+import java.util.Arrays;
+
 public class Line {
 
-    private final Cell[] line;
+    private Cell[] line;
 
 
     public Line(int width) {
@@ -18,6 +20,18 @@ public class Line {
 
     public int getWidth() {
         return line.length;
+    }
+
+    public void expand(int n) {
+        Cell[] newLine = Arrays.copyOf(line, line.length + n);
+        for (int i = line.length; i < newLine.length; i++) {
+            newLine[i] = new Cell();
+        }
+        line = newLine;
+    }
+
+    public void shrink(int n) {
+        line = Arrays.copyOf(line, line.length - n);
     }
 
     @Override

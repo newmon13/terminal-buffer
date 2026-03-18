@@ -490,4 +490,60 @@ public class TerminalBufferTest{
 
         assertEquals("aa", terminalBuffer.getScreenContent());
     }
+
+    @Test
+    void shouldIncreaseScreenWidth() {
+        terminalBuffer.increaseScreenWidth(5);
+
+        assertEquals(SCREEN_WIDTH + 5, terminalBuffer.getLineAtScreen(0).getWidth());
+    }
+
+    @Test
+    void shouldDecreaseScreenWidth() {
+        terminalBuffer.decreaseScreenWidth(5);
+
+        assertEquals(SCREEN_WIDTH - 5, terminalBuffer.getLineAtScreen(0).getWidth());
+    }
+
+    @Test
+    void shouldKeepContentWhenIncreasingWidth() {
+        terminalBuffer.write("Hello");
+        terminalBuffer.increaseScreenWidth(5);
+
+        assertEquals("Hello", terminalBuffer.getLineAtScreen(0).toString());
+    }
+
+    @Test
+    void shouldLoseContentWhenDecreasingFilledLine() {
+        terminalBuffer.write("HelloWorld");
+        terminalBuffer.decreaseScreenWidth(5);
+
+        assertEquals("Hello", terminalBuffer.getLineAtScreen(0).toString());
+    }
+
+    @Test
+    void shouldClampCursorWhenDecreasingWidthBelowCursorPosition() {
+        terminalBuffer.getCursor().setX(SCREEN_WIDTH - 1);
+        terminalBuffer.decreaseScreenWidth(5);
+
+        assertEquals(SCREEN_WIDTH - 5 - 1, terminalBuffer.getCursor().getX());
+    }
+
+    @Test
+    void shouldThrowWhenIncreaseScreenWidthByNegativeNumber() {
+        assertThrows(IllegalArgumentException.class,
+                () -> terminalBuffer.increaseScreenWidth(-1));
+    }
+
+    @Test
+    void shouldThrowWhenIncreaseScreenWidthExceedsMax() {
+        assertThrows(IllegalArgumentException.class,
+                () -> terminalBuffer.increaseScreenWidth(500));
+    }
+
+    @Test
+    void shouldThrowWhenDecreaseScreenWidthBelowOne() {
+        assertThrows(IllegalArgumentException.class,
+                () -> terminalBuffer.decreaseScreenWidth(SCREEN_WIDTH));
+    }
 }

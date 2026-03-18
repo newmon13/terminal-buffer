@@ -8,6 +8,7 @@ import java.util.List;
 public class TerminalBuffer {
 
     private final static int MAX_HEIGHT = 100;
+    private final static int MAX_WIDTH = 500;
 
     private List<Line> screen;
     private final ArrayDeque<Line> scrollback = new ArrayDeque<>();
@@ -28,6 +29,28 @@ public class TerminalBuffer {
         for (int i = 0; i < height; i++) {
             screen.add(new Line(width));
         }
+    }
+
+    public void increaseScreenWidth(int n) {
+        if (n <= 0) throw new IllegalArgumentException("n must be positive");
+        if (width + n > MAX_WIDTH) throw new IllegalArgumentException("Exceeded maximum screen width: " + MAX_WIDTH);
+
+        for (Line line : screen) {
+            line.expand(n);
+        }
+        width += n;
+        cursor.setXBoundary(width);
+    }
+
+    public void decreaseScreenWidth(int n) {
+        if (n <= 0) throw new IllegalArgumentException("n must be positive");
+        if (width - n < 1) throw new IllegalArgumentException("Screen width must be at least 1");
+
+        for (Line line : screen) {
+            line.shrink(n);
+        }
+        width -= n;
+        cursor.setXBoundary(width);
     }
 
     public void increaseScreenHeight(int n) {
