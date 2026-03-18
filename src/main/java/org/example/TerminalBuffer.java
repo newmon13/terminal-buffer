@@ -64,7 +64,7 @@ public class TerminalBuffer {
             if (scrollback.size() >= scrollbackMaxSize) {
                 scrollback.pop();
             }
-            scrollback.add(screen.remove(0));
+            scrollback.add(copyLine(screen.remove(0)));
         }
     }
 
@@ -134,6 +134,14 @@ public class TerminalBuffer {
         dst.setBlocked(src.isBlocked());
     }
 
+    private Line copyLine(Line src) {
+        Line dst = new Line(src.getWidth());
+        for (int i = 0; i < src.getWidth(); i++) {
+            copy(src.getCell(i), dst.getCell(i));
+        }
+        return dst;
+    }
+
     public void clearScreen() {
         for (Line line : screen) {
             for (int j = 0; j < line.getWidth(); j++) {
@@ -167,7 +175,7 @@ public class TerminalBuffer {
             if (scrollback.size() >= scrollbackMaxSize) {
                 scrollback.pop();
             }
-            scrollback.add(oldestLine);
+            scrollback.add(copyLine(oldestLine));
             screen.remove(0);
         }
 
@@ -213,7 +221,7 @@ public class TerminalBuffer {
 
     public Line getLineAtScrollback(int y) {
         Line[] lines = scrollback.toArray(new Line[0]);
-        return lines[y];
+        return copyLine(lines[y]);
     }
 
     public String getCharacterAtScreen(int x, int y) {

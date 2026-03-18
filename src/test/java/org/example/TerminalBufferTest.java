@@ -326,6 +326,16 @@ public class TerminalBufferTest{
     }
 
     @Test
+    void shouldNotModifyScrollbackWhenModifyingReturnedLine() {
+        terminalBuffer.write("Hello");
+        terminalBuffer.insertEmptyLineAtTheBottomOfScreen();
+
+        terminalBuffer.getLineAtScrollback(0).getCell(0).setCharacter("X");
+
+        assertEquals("H", terminalBuffer.getCharacterAtScrollback(0, 0));
+    }
+
+    @Test
     void shouldFillLineWithEmptyCharacter() {
         terminalBuffer.write("HelloWorld");
         terminalBuffer.getCursor().setX(0);
